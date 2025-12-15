@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+async function sendPrompt() {
+const apiKey = document.getElementById('apiKey').value.trim();
+const prompt = document.getElementById('prompt').value.trim();
+const resultEl = document.getElementById('result');
+
+
+if (!apiKey || !prompt) {
+resultEl.textContent = '❌ 請輸入 API Key 與內容';
+return;
+}
+
+
+resultEl.textContent = '⏳ 請求中...';
+
+
+try {
+const res = await fetch('https://api.openai.com/v1/chat/completions', {
+method: 'POST',
+headers: {
+'Content-Type': 'application/json',
+'Authorization': `Bearer ${apiKey}`
+},
+body: JSON.stringify({
+model: 'gpt-4o-mini',
+messages: [
+{ role: 'system', content: '你是一個遵循安全規範的 AI 助手。' },
+{ role: 'user', content: prompt }
+]
+})
+});
+
+
+const data = await res.json();
+
+
+if (data.error) {
+resultEl.textContent = '❌ ' + data.error.message;
+return;
+}
+
+
+resultEl.textContent = data.choices[0].message.content;
+
+
+} catch (err) {
+resultEl.textContent = '❌ 發生錯誤：' + err.message;
+}
+}
+</script>
+
+
+</body>
+</html>
