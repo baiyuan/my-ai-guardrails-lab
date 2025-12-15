@@ -1,2 +1,74 @@
-# my-ai-guardrails-lab
-🛡 Community-driven LLM Guardrails Red/Blue Team Lab using NeMo, Tailwind UI, and ISO-aligned security design.
+---
+
+## 🌏 正體中文說明（Traditional Chinese）
+
+### 專案簡介
+
+**My AI Guardrails Lab** 是一個社群導向的開源專案，  
+目標是展示如何用 **Guardrails（防護欄）** 來保護大型語言模型（LLM）。
+
+LLM 很強，但如果沒有控制機制，風險也非常高。
+
+本專案示範如何：
+
+- 防止 Prompt Injection / Jailbreak  
+- 阻擋詐騙與社交工程型輸出  
+- 提供「可解釋」的阻擋原因  
+- 將 AI 安全納入風險管理與合規設計  
+
+---
+
+### 功能特色
+
+#### 🔴 紅隊模式
+
+- 越獄測試 Prompt  
+- 誘導、角色扮演、指令覆寫  
+- 詐騙與社工話術測試  
+
+#### 🔵 藍隊模式
+
+- 輸入 / 輸出安全檢查  
+- 阻擋原因說明  
+- 安全替代回應  
+
+#### 🛡 NeMo Guardrails
+
+- 雙層防護（Input / Output）  
+- 避免具體可執行的危險內容  
+
+#### 🌐 純前端展示
+
+- HTML + Tailwind CSS + JavaScript  
+- OpenAI API Key 僅存在瀏覽器  
+- 不落地、不儲存  
+
+- 📱 支援 RWD（手機 / 桌機）  
+
+#### 📜 對應 ISO 設計思維
+
+- ISO 27001  
+- ISO 27701  
+
+---
+
+### 適合誰使用？
+
+- 資安工程師 / 資安顧問  
+- AI / LLM 開發者  
+- 想研究 AI 越獄與防護的人  
+- 需要向主管、客戶或稽核說明 AI 風險控管的人  
+
+---
+
+### 專案理念
+
+> **AI 的風險，不該只靠模型本身解決。**  
+> Guardrails 是 AI 系統工程的一部分。
+
+這個專案希望讓更多人：
+
+- 看懂 LLM 的真實風險  
+- 學會如何「把 AI 放進治理框架裡」  
+
+---
