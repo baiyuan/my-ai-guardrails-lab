@@ -1,54 +1,97 @@
 <!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="UTF-8" />
+  <title>My AI Guardrails Lab</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+  <!-- Tailwind CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-100 min-h-screen p-4">
+  <div class="max-w-3xl mx-auto bg-white rounded-xl shadow p-6 space-y-4">
+
+    <h1 class="text-2xl font-bold">🛡 My AI Guardrails Lab</h1>
+
+    <div>
+      <label class="block text-sm font-medium">OpenAI API Key</label>
+      <input id="apiKey" type="password"
+        class="w-full border rounded px-3 py-2"
+        placeholder="sk-..." />
+      <p class="text-xs text-gray-500 mt-1">
+        🔒 API Key 只存在瀏覽器，不會被儲存
+      </p>
+    </div>
+
+    <div>
+      <label class="block text-sm font-medium">Prompt</label>
+      <textarea id="prompt" rows="5"
+        class="w-full border rounded px-3 py-2"
+        placeholder="輸入測試 Prompt（越獄 / 詐騙 / 正常請求）"></textarea>
+    </div>
+
+    <button onclick="sendPrompt()"
+      class="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700">
+      🚀 Send
+    </button>
+
+    <pre id="result"
+      class="bg-gray-900 text-green-200 p-4 rounded text-sm whitespace-pre-wrap">
+    </pre>
+
+  </div>
+
+<script>
 async function sendPrompt() {
-const apiKey = document.getElementById('apiKey').value.trim();
-const prompt = document.getElementById('prompt').value.trim();
-const resultEl = document.getElementById('result');
+  const apiKey = document.getElementById('apiKey').value.trim();
+  const prompt = document.getElementById('prompt').value.trim();
+  const resultEl = document.getElementById('result');
 
+  if (!apiKey || !prompt) {
+    resultEl.textContent = '❌ 請輸入 API Key 與 Prompt';
+    return;
+  }
 
-if (!apiKey || !prompt) {
-resultEl.textContent = '❌ 請輸入 API Key 與內容';
-return;
-}
+  resultEl.textContent = '⏳ 請求中...';
 
+  try {
+    const res = await fetch('https://api.openai.com/v1/responses', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${apiKey}`
+      },
+      body: JSON.stringify({
+        model: 'gpt-4.1-mini',
+        input: [
+          {
+            role: 'system',
+            content: '你是一個遵循安全規範與 Guardrails 的 AI 助手。'
+          },
+          {
+            role: 'user',
+            content: prompt
+          }
+        ]
+      })
+    });
 
-resultEl.textContent = '⏳ 請求中...';
+    const data = await res.json();
 
+    if (!res.ok) {
+      resultEl.textContent =
+        '❌ API Error:\n' + JSON.stringify(data, null, 2);
+      return;
+    }
 
-try {
-const res = await fetch('https://api.openai.com/v1/chat/completions', {
-method: 'POST',
-headers: {
-'Content-Type': 'application/json',
-'Authorization': `Bearer ${apiKey}`
-},
-body: JSON.stringify({
-model: 'gpt-4o-mini',
-messages: [
-{ role: 'system', content: '你是一個遵循安全規範的 AI 助手。' },
-{ role: 'user', content: prompt }
-]
-})
-});
+    resultEl.textContent =
+      data.output_text || '（沒有輸出內容）';
 
-
-const data = await res.json();
-
-
-if (data.error) {
-resultEl.textContent = '❌ ' + data.error.message;
-return;
-}
-
-
-resultEl.textContent = data.choices[0].message.content;
-
-
-} catch (err) {
-resultEl.textContent = '❌ 發生錯誤：' + err.message;
-}
+  } catch (err) {
+    resultEl.textContent = '❌ 發生錯誤：' + err.message;
+  }
 }
 </script>
-
 
 </body>
 </html>
