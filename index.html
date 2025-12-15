@@ -2,93 +2,163 @@
 <html lang="zh-Hant">
 <head>
   <meta charset="UTF-8" />
-  <title>My AI Guardrails Lab</title>
+  <title>AI Guardrails Lab (已修復版)</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-
-  <!-- Tailwind CDN -->
   <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+  <style>
+      body { font-family: system-ui, -apple-system, sans-serif; }
+      /* 自定義 Markdown 樣式 */
+      .prose h1 { font-size: 1.5em; font-weight: bold; margin-top: 1em; margin-bottom: 0.5em; }
+      .prose h2 { font-size: 1.25em; font-weight: bold; margin-top: 1em; margin-bottom: 0.5em; }
+      .prose ul { list-style-type: disc; padding-left: 1.5rem; margin: 0.5em 0; }
+      .prose ol { list-style-type: decimal; padding-left: 1.5rem; margin: 0.5em 0; }
+      .prose pre { background: #1e293b; color: #e2e8f0; padding: 1rem; border-radius: 0.5rem; overflow-x: auto; margin: 1em 0; }
+      .prose code { color: #ef4444; font-weight: bold; font-size: 0.9em; }
+  </style>
 </head>
-<body class="bg-gray-100 min-h-screen p-4">
-  <div class="max-w-3xl mx-auto bg-white rounded-xl shadow p-6 space-y-4">
+<body class="bg-slate-100 min-h-screen p-4 md:p-8 flex justify-center items-start">
 
-    <h1 class="text-2xl font-bold">🛡 My AI Guardrails Lab</h1>
-
-    <div>
-      <label class="block text-sm font-medium">OpenAI API Key</label>
-      <input id="apiKey" type="password"
-        class="w-full border rounded px-3 py-2"
-        placeholder="sk-..." />
-      <p class="text-xs text-gray-500 mt-1">
-        🔒 API Key 只存在瀏覽器，不會被儲存
-      </p>
+  <div class="w-full max-w-3xl bg-white rounded-2xl shadow-xl overflow-hidden ring-1 ring-slate-900/5">
+    
+    <div class="bg-slate-800 p-6 text-white flex justify-between items-center">
+        <div>
+            <h1 class="text-2xl font-bold flex items-center gap-2">🛡️ AI Guardrails Lab</h1>
+            <p class="text-slate-400 text-sm mt-1">Prompt 測試與越獄實驗室 (Fixed by Gemini)</p>
+        </div>
+        <div class="text-xs bg-slate-700 px-3 py-1 rounded-full text-slate-300">v2.0</div>
     </div>
 
-    <div>
-      <label class="block text-sm font-medium">Prompt</label>
-      <textarea id="prompt" rows="5"
-        class="w-full border rounded px-3 py-2"
-        placeholder="輸入測試 Prompt（越獄 / 詐騙 / 正常請求）"></textarea>
+    <div class="p-6 space-y-6">
+
+      <div>
+        <label class="block text-sm font-bold text-slate-700 mb-2">OpenAI API Key</label>
+        <div class="relative">
+            <input id="apiKey" type="password"
+              class="w-full border border-slate-300 rounded-lg px-4 py-2.5 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition"
+              placeholder="sk-..." onchange="saveKey()" />
+            <button onclick="toggleKeyVisibility()" class="absolute right-3 top-3 text-slate-400 hover:text-slate-600 text-sm">
+                👁️
+            </button>
+        </div>
+        <p class="text-xs text-slate-500 mt-2 flex items-center gap-1">
+          🔒 Key 僅儲存於瀏覽器 LocalStorage，不會上傳伺服器。
+        </p>
+      </div>
+
+      <div>
+        <label class="block text-sm font-bold text-slate-700 mb-2">System Prompt (系統設定)</label>
+        <input id="systemPrompt" type="text" value="你是一個遵循安全規範與 Guardrails 的 AI 助手。" 
+            class="w-full border border-slate-300 rounded-lg px-4 py-2 text-sm text-slate-600 bg-slate-50 mb-4 focus:bg-white focus:ring-2 focus:ring-blue-500 outline-none">
+
+        <label class="block text-sm font-bold text-slate-700 mb-2">User Prompt (測試輸入)</label>
+        <textarea id="prompt" rows="4"
+          class="w-full border border-slate-300 rounded-lg px-4 py-3 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition resize-none text-slate-800"
+          placeholder="在此輸入測試 Prompt（越獄攻擊 / 詐騙測試 / 正常請求）..."></textarea>
+      </div>
+
+      <button onclick="sendPrompt()" id="submitBtn"
+        class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 rounded-lg shadow-lg shadow-blue-500/30 transition active:scale-[0.98] flex justify-center items-center gap-2">
+        <span>🚀 發送請求</span>
+      </button>
+
+      <div id="resultContainer" class="hidden">
+        <div class="flex items-center justify-between mb-2">
+            <label class="block text-sm font-bold text-slate-700">Response (AI 回應)</label>
+            <span id="timeCost" class="text-xs text-slate-400 font-mono"></span>
+        </div>
+        <div id="result" class="bg-slate-50 border border-slate-200 rounded-lg p-5 text-sm text-slate-800 prose prose-slate max-w-none leading-relaxed">
+            </div>
+        <details class="mt-4">
+            <summary class="text-xs text-slate-400 cursor-pointer hover:text-blue-500">查看原始 JSON</summary>
+            <pre id="jsonResult" class="bg-slate-900 text-green-400 p-4 rounded mt-2 text-xs overflow-x-auto font-mono"></pre>
+        </details>
+      </div>
+
     </div>
-
-    <button onclick="sendPrompt()"
-      class="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700">
-      🚀 Send
-    </button>
-
-    <pre id="result"
-      class="bg-gray-900 text-green-200 p-4 rounded text-sm whitespace-pre-wrap">
-    </pre>
-
   </div>
 
 <script>
+// 初始化：載入 Key
+window.onload = () => {
+    const savedKey = localStorage.getItem('openai_lab_key');
+    if (savedKey) document.getElementById('apiKey').value = savedKey;
+}
+
+function saveKey() {
+    const key = document.getElementById('apiKey').value.trim();
+    if(key) localStorage.setItem('openai_lab_key', key);
+}
+
+function toggleKeyVisibility() {
+    const input = document.getElementById('apiKey');
+    input.type = input.type === 'password' ? 'text' : 'password';
+}
+
 async function sendPrompt() {
   const apiKey = document.getElementById('apiKey').value.trim();
   const prompt = document.getElementById('prompt').value.trim();
+  const systemPrompt = document.getElementById('systemPrompt').value.trim();
   const resultEl = document.getElementById('result');
+  const jsonEl = document.getElementById('jsonResult');
+  const container = document.getElementById('resultContainer');
+  const btn = document.getElementById('submitBtn');
+  const timeEl = document.getElementById('timeCost');
 
   if (!apiKey || !prompt) {
-    resultEl.textContent = '❌ 請輸入 API Key 與 Prompt';
+    alert('❌ 請輸入 API Key 與 Prompt');
     return;
   }
 
-  resultEl.textContent = '⏳ 請求中...';
+  // UI Loading 狀態
+  container.classList.remove('hidden');
+  resultEl.innerHTML = '<div class="animate-pulse flex space-x-2"><div class="h-2 w-2 bg-slate-400 rounded-full"></div><div class="h-2 w-2 bg-slate-400 rounded-full"></div><div class="h-2 w-2 bg-slate-400 rounded-full"></div></div>';
+  jsonEl.textContent = 'Waiting...';
+  btn.disabled = true;
+  btn.classList.add('opacity-70', 'cursor-not-allowed');
+  
+  const startTime = Date.now();
 
   try {
-    const res = await fetch('https://api.openai.com/v1/responses', {
+    // 這裡才是正確的 OpenAI Endpoint
+    const res = await fetch('https://api.openai.com/v1/chat/completions', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
         'Authorization': `Bearer ${apiKey}`
       },
       body: JSON.stringify({
-        model: 'gpt-4.1-mini',
-        input: [
-          {
-            role: 'system',
-            content: '你是一個遵循安全規範與 Guardrails 的 AI 助手。'
-          },
-          {
-            role: 'user',
-            content: prompt
-          }
-        ]
+        model: 'gpt-4o-mini', // 用這個比較省錢又快
+        messages: [
+          { role: 'system', content: systemPrompt },
+          { role: 'user', content: prompt }
+        ],
+        temperature: 0.7 
       })
     });
 
     const data = await res.json();
+    const endTime = Date.now();
+    timeEl.textContent = `耗時: ${((endTime - startTime) / 1000).toFixed(2)}s`;
 
     if (!res.ok) {
-      resultEl.textContent =
-        '❌ API Error:\n' + JSON.stringify(data, null, 2);
+      resultEl.innerHTML = `<span class="text-red-500 font-bold">❌ API Error:</span> ${data.error?.message || '未知錯誤'}`;
+      jsonEl.textContent = JSON.stringify(data, null, 2);
       return;
     }
 
-    resultEl.textContent =
-      data.output_text || '（沒有輸出內容）';
+    // 正確解析回傳內容
+    const content = data.choices[0].message.content;
+    
+    // 使用 Marked 解析 Markdown
+    resultEl.innerHTML = marked.parse(content);
+    jsonEl.textContent = JSON.stringify(data, null, 2);
 
   } catch (err) {
-    resultEl.textContent = '❌ 發生錯誤：' + err.message;
+    resultEl.innerHTML = `<span class="text-red-500 font-bold">❌ 網路錯誤：</span> ${err.message}`;
+  } finally {
+    btn.disabled = false;
+    btn.classList.remove('opacity-70', 'cursor-not-allowed');
   }
 }
 </script>
