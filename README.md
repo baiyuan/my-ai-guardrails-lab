@@ -1,236 +1,80 @@
-# 🛡 My AI Guardrails Lab
+# 🛡️ My AI Guardrails Lab
 
-> A community-driven open-source lab for experimenting with **LLM Guardrails**, Red Team / Blue Team testing, and AI risk governance.
+![License](https://img.shields.io/badge/license-MIT-blue.svg)
+![Status](https://img.shields.io/badge/status-Phase%201%3A%20Client--Side%20Simulation-yellow)
+![Tech](https://img.shields.io/badge/tech-HTML%20%7C%20Tailwind%20%7C%20OpenAI-green)
 
----
+這是一個關於 **LLM 安全防護欄 (Guardrails)** 的實驗性專案。
+本專案旨在探索與實作「在 AI 模型輸入前與輸出後」的攔截機制，以防止 Prompt Injection（提示詞注入）、越獄攻擊以及不當內容的生成。
 
-## 📚 Table of Contents
+## 🌟 專案現況 (Current Status)
 
-### 🌍 English
+目前專案處於 **Phase 1 (前端模擬階段)**。
+為了快速驗證 Guardrails 的核心邏輯（Input/Output Rails），目前的版本採用 **純前端 (Client-side JavaScript)** 來模擬攔截機制。
 
-* [Introduction](#-introduction)
-* [Why Guardrails Matter](#-why-guardrails-matter)
-* [Key Features](#-key-features)
-* [Architecture Overview](#-architecture-overview)
-* [Quick Start](#-quick-start)
-* [Project Structure](#-project-structure)
-* [Who Is This For](#-who-is-this-for)
-* [Philosophy](#-philosophy)
-* [Contributing](#-contributing)
-* [License](#-license)
+這允許使用者在 **不需要架設 Python 後端伺服器** 的情況下，透過 GitHub Pages 快速體驗 Guardrails 的運作原理。
 
-### 🌏 正體中文
-
-* [專案簡介](#-專案簡介)
-* [為什麼需要 Guardrails](#-為什麼需要-guardrails)
-* [功能特色](#-功能特色)
-* [系統架構概覽](#-系統架構概覽)
-* [快速開始](#-快速開始)
-* [專案目錄結構](#-專案目錄結構)
-* [適合誰使用](#-適合誰使用)
-* [專案理念](#-專案理念)
-* [如何參與貢獻](#-如何參與貢獻)
-* [授權方式](#-授權方式)
+> **🚧 開發路線圖 (Roadmap):**
+> - [x] **Phase 1:** 純前端模擬 Guardrails 邏輯 (JS-based Logic, OpenAI API Direct Call)
+> - [ ] **Phase 2:** 整合 **NVIDIA NeMo Guardrails** (Python Backend, FastAPI, Colang definitions)
+> - [ ] **Phase 3:** 自定義與進階的對話流控制
 
 ---
 
-## 🌍 Introduction
+## 🚀 線上展示 (Demo)
 
-**My AI Guardrails Lab** is a community-driven open-source project designed to demonstrate how Guardrails can be used to protect Large Language Models (LLMs) from misuse, abuse, and unintended harmful outputs.
-
-LLMs are powerful — but without proper controls, they introduce significant security, compliance, and governance risks.
-
-This project demonstrates how to:
-
-* Prevent prompt injection and jailbreak attempts
-* Block scam, fraud, and social engineering outputs
-* Provide **explainable blocking reasons**
-* Integrate AI safety into risk management and compliance design
+🔗 **[點擊這裡開啟 AI Guardrails Lab](https://baiyuan.github.io/my-ai-guardrails-lab/)**
+*(請確保您擁有 OpenAI API Key 以進行測試)*
 
 ---
 
-## ❓ Why Guardrails Matter
+## ⚙️ 架構說明 (Architecture)
 
-AI risks should not be solved by models alone.
+### Phase 1: Client-Side Simulation (目前版本)
+在這個階段，我們在瀏覽器端模擬了「三層防護」結構：
 
-**Guardrails are part of system engineering**, not just model alignment.
+1.  **Input Rail (輸入防護)**：
+    * 在發送請求給 OpenAI 之前，JavaScript 引擎會先掃描使用者的 Prompt。
+    * 若包含「禁忌關鍵字」或符合特定 **正規表示式 (Regex)** 規則，將直接攔截，**不發送 API 請求**（節省 Token 費用）。
+2.  **LLM Interaction**:
+    * 通過檢查後，前端直接呼叫 OpenAI `v1/chat/completions` API。
+3.  **Output Rail (輸出防護)**：
+    * 收到 AI 回應後，再次檢查內容是否符合安全規範。
+    * 若 AI 產生幻覺或不當內容，前端將隱藏原始回應並顯示警告。
 
-This lab helps teams understand:
-
-* Real-world LLM abuse patterns
-* Practical defense strategies
-* How to place AI inside governance frameworks
-
----
-
-## ✨ Key Features
-
-### 🔴 Red Team Mode
-
-* Jailbreak and prompt injection testing
-* Role-play and instruction override attempts
-* Scam and social engineering prompt simulation
-
-### 🔵 Blue Team Mode
-
-* Input and output safety validation
-* Clear blocking reason explanations
-* Safe alternative responses
-
-### 🛡 NeMo Guardrails
-
-* Dual-layer protection (Input / Output)
-* Avoids actionable or executable harmful content
-
-### 🌐 Frontend-Only Demo
-
-* HTML + Tailwind CSS + JavaScript
-* OpenAI API Key stays in the browser
-* No backend, no storage, no data persistence
-
-### 📱 Responsive Design
-
-* Works on mobile and desktop
-
-### 📜 ISO-Aligned Thinking
-
-* ISO 27001
-* ISO 27701
+### Phase 2: NeMo Guardrails Integration (計畫中)
+下一階段將引入 Python 後端，架構將升級為：
+`Client` <--> `Python Server (NeMo Guardrails)` <--> `OpenAI`
+屆時將支援更複雜的對話流（Colang）與上下文控管。
 
 ---
 
-## 🏗 Architecture Overview
+## 🛠️ 技術堆疊 (Tech Stack)
 
-```text
-Browser (User)
-  │
-  ├─ Red / Blue Team UI
-  │
-  ├─ Guardrails Logic (JS)
-  │
-  └─ OpenAI API (Client-side only)
-```
+* **Frontend:** HTML5, Tailwind CSS (CDN)
+* **Logic:** Vanilla JavaScript (ES6+)
+* **Markdown Rendering:** Marked.js
+* **AI Provider:** OpenAI API (gpt-4o-mini)
 
 ---
 
-## 🚀 Quick Start
+## 🔒 安全性聲明 (Security Note)
 
-```bash
-git clone https://github.com/your-org/my-ai-guardrails-lab.git
-cd my-ai-guardrails-lab
-open index.html
-```
-
-> ⚠️ Note: You will need to provide your own OpenAI API Key in the browser.
+* **API Key 隱私**：本專案的 Phase 1 版本為純靜態網頁。您的 OpenAI API Key **僅儲存於您瀏覽器的 LocalStorage** 中，用於發送請求，**絕對不會** 上傳至任何第三方伺服器或此 GitHub Repository。
+* 您可以隨時查看 **原始碼 (Source Code)** 中的 `index.html` 以驗證此安全性設計。
 
 ---
 
-## 📁 Project Structure
+## 🧪 如何使用 (How to Use)
 
-```text
-my-ai-guardrails-lab/
-├─ index.html
-├─ assets/
-│  ├─ css/
-│  └─ js/
-├─ guardrails/
-│  ├─ input.rules.js
-│  └─ output.rules.js
-├─ prompts/
-│  ├─ red-team.md
-│  └─ blue-team.md
-├─ README.md
-└─ LICENSE
-```
+1.  進入 [Demo 頁面](https://baiyuan.github.io/my-ai-guardrails-lab/)。
+2.  點擊右上角設定您的 **OpenAI API Key**。
+3.  在設定欄位自定義 **禁忌關鍵字 (Blacklist)**（例如：`破解`, `序號`）。
+4.  嘗試輸入違規 Prompt，觀察主控台 (Console Log) 的攔截過程。
+5.  嘗試輸入正常 Prompt，觀察 AI 的回應。
 
 ---
 
-## 🌏 專案簡介
-
-**My AI Guardrails Lab** 是一個社群導向的開源專案，
-目標是展示如何透過 **Guardrails（防護欄）** 來保護大型語言模型（LLM）。
-
-LLM 很強，但如果沒有控制機制，風險也會等比例放大。
-
-本專案示範如何：
-
-* 防止 Prompt Injection / Jailbreak
-* 阻擋詐騙與社交工程型輸出
-* 提供「可解釋」的阻擋原因
-* 將 AI 安全納入風險管理與合規設計
-
----
-
-## ❓ 為什麼需要 Guardrails
-
-AI 的風險，不該只靠模型本身解決。
-
-**Guardrails 是 AI 系統工程的一部分。**
-
-這個專案希望讓更多人：
-
-* 看懂 LLM 的真實風險
-* 學會如何「把 AI 放進治理框架裡」
-
----
-
-## ✨ 功能特色
-
-### 🔴 紅隊模式
-
-* 越獄測試 Prompt
-* 誘導、角色扮演、指令覆寫
-* 詐騙與社工話術測試
-
-### 🔵 藍隊模式
-
-* 輸入 / 輸出安全檢查
-* 阻擋原因說明
-* 安全替代回應
-
-### 🛡 NeMo Guardrails
-
-* 雙層防護（Input / Output）
-* 避免具體可執行的危險內容
-
-### 🌐 純前端展示
-
-* HTML + Tailwind CSS + JavaScript
-* OpenAI API Key 僅存在瀏覽器
-* 不落地、不儲存
-
-### 📱 支援 RWD（手機 / 桌機）
-
-### 📜 對應 ISO 設計思維
-
-* ISO 27001
-* ISO 27701
-
----
-
-## 👥 適合誰使用
-
-* 資安工程師 / 顧問
-* AI / LLM 開發者
-* 想研究 AI 越獄與防護的人
-* 需要向主管、客戶或稽核說明 AI 風險控管的人
-
----
-
-## 🧭 專案理念
-
-AI 的風險，不該只靠模型本身解決。
-
-Guardrails 是 AI 系統工程的一部分。
-
----
-
-## 🤝 Contributing
-
-Contributions are welcome! Please open issues or submit pull requests.
-
----
-
-## 📄 License
+## 📝 授權 (License)
 
 MIT License
